@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body {font-family:Arial; background:#f5f6fa; margin:0; padding:10px;}
+.card {background:white; padding:10px; border-radius:8px; margin-bottom:10px;}
+
+.filter {
+  display:flex;
+  gap:10px;
+}
+.filter input, .filter select {
+  flex:1;
+  padding:8px;
+}
+
+.table-wrap {
+  overflow-x:auto;
+  max-height:65vh;
+}
+
+table {
+  width:100%;
+  border-collapse:collapse;
+  min-width:700px;
+}
+
+th, td {
+  border:1px solid #ccc;
+  padding:6px;
+  font-size:13px;
+}
+
+thead th {
+  position: sticky;
+  top:0;
+  background:#dee2e6;
+}
+
+/* trạng thái */
+.overdue {background:#ffcccc;}
+.soon {background:#fff3cd;}
+.normal {background:#d4edda;}
+.dung {background:#e2e3e5; color:#666;}
+
+.file-btn {
+  display:inline-block;
+  background:#58b3f5;
+  color:white;
+  padding:2px 6px;
+  border-radius:4px;
+  text-decoration:none;
+  margin-right:4px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card filter">
+  <input id="search" placeholder="🔍 Tìm kiếm">
+  <select id="donvi"></select>
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>STT</th>
+          <th>Số VB</th>
+          <th>Nội dung</th>
+          <th>Đơn vị</th>
+          <th>Hạn</th>
+          <th>Trạng thái</th>
+          <th>Đã ban hành</th>
+        </tr>
+      </thead>
+      <tbody id="tbl"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+const API = "👉 DÁN LINK APPS SCRIPT";
+
+let DATA = [];
+
+fetch(API)
+  .then(r => r.json())
+  .then(data => {
+    DATA = data;
+    render(data);
+    buildDonVi(data);
+  });
+
+function formatDate(d){
+  if(!d) return "";
+  let x = new Date(d);
+  return x.toLocaleDateString("vi-VN");
+}
+
+function render(data){
+  let html = "";
+
+  data.forEach((d,i) => {
+
+    let cls = "normal";
+    if(d.dung) cls="dung";
+    else if(d.diff < 0) cls="overdue";
+    else if(d.diff <=3) cls="soon";
+
+    html += `
+    <tr class="${cls}">
+      <td>${i+1}</td>
+      <td>
+        ${d.linkFile ? `<a href="${d.linkFile}" target="_blank" class="file-btn">📄</a>` : ""}
+        <b>${d.soVB}</b>
+      </td>
+      <td>${d.noiDung || ""}</td>
+      <td>${d.donVi || ""}</td>
+      <td>${formatDate(d.hanDate)}</td>
+      <td>${d.trangThai || ""}</td>
+      <td>
+        ${d.linkFile2 ? `<a href="${d.linkFile2}" target="_blank" class="file-btn">📄</a>` : ""}
+        ${d.soVBBHcapXa || ""}
+      </td>
+    </tr>`;
+  });
+
+  document.getElementById("tbl").innerHTML = html;
+}
+
+function buildDonVi(data){
+  let set = new Set();
+  data.forEach(d => set.add(d.donVi));
+
+  let html = '<option value="">Tất cả đơn vị</option>';
+  set.forEach(d => html += `<option>${d}</option>`);
+
+  document.getElementById("donvi").innerHTML = html;
+}
+
+document.getElementById("search").oninput = filter;
+document.getElementById("donvi").onchange = filter;
+
+function filter(){
+  let k = document.getElementById("search").value.toLowerCase();
+  let dv = document.getElementById("donvi").value;
+
+  let filtered = DATA.filter(d =>
+    (!k || JSON.stringify(d).toLowerCase().includes(k)) &&
+    (!dv || d.donVi === dv)
+  );
+
+  render(filtered);
+}
+</script>
+
+</body>
+</html>
