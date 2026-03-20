@@ -107,11 +107,26 @@ document.getElementById("today").innerText =
 
 // ===== LOAD DATA =====
 fetch(API)
-  .then(r => r.json())
-  .then(data => {
-    DATA = data;
-    buildDonVi();
-    render(DATA);
+  .then(r => {
+    console.log("STATUS:", r.status);
+    return r.text(); // 👉 đọc text trước
+  })
+  .then(txt => {
+    console.log("RAW DATA:", txt);
+
+    try {
+      const data = JSON.parse(txt);
+      DATA = data;
+      buildDonVi();
+      render(DATA);
+    } catch(e){
+      console.error("JSON ERROR:", e);
+      alert("API không phải JSON!");
+    }
+  })
+  .catch(err => {
+    console.error("FETCH ERROR:", err);
+    alert("Không gọi được API!");
   });
 
 // ===== BUILD ĐƠN VỊ =====
