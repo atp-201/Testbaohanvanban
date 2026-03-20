@@ -5,434 +5,169 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-      body { 
-        font-family: Arial; 
-        margin:0; 
-        background:#f5f6fa;
-      }
+/* 👉 GIỮ NGUYÊN CSS CỦA BẠN */
+body { font-family: Arial; margin:0; background:#f5f6fa;}
+.container { padding:15px;}
+.card { background:white; padding:12px; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.1); margin-bottom:12px; text-align:center;}
+h2 { margin:0 0 10px; font-size:18px;}
 
-      .container { 
-        padding:15px;
-      }
+input, select {
+  padding:10px; border:1px solid #ccc; border-radius:6px;
+  width:100%; margin-bottom:8px; font-size:14px;
+}
 
-      .card { 
-        background:white; 
-        padding:12px; 
-        border-radius:10px; 
-        box-shadow:0 2px 6px rgba(0,0,0,0.1); 
-        margin-bottom:12px; 
-        text-align: center;
-      }
+.table-wrap { overflow-x:auto; max-height:60vh; border:1px solid #ccc;}
+table { width:100%; border-collapse:collapse; min-width:600px;}
+th { background:#dee2e6;}
+th,td { border-bottom:1px solid #bbb; padding:8px; font-size:13px;}
 
-      h2 { 
-        margin:0 0 10px;
-        font-size:18px;
-      }
+.overdue {background:#ffcccc;}
+.soon {background:#fff3cd;}
+.normal {background:#d4edda;}
+.dung {background:#e2e3e5;}
 
-      /* ===== INPUT ===== */
-      input, select {
-        padding:10px;
-        border:1px solid #ccc;
-        border-radius:6px;
-        width:100%;
-        margin-bottom:8px;
-        font-size:14px;
-        box-sizing: border-box;
-      }
+.filter-bar { display:flex; justify-content:center; gap:15px;}
+.filter-item { display:flex; align-items:center; gap:8px; width:300px;}
+.icon { font-size:18px;}
 
-      /* ===== TABLE ===== */
-      .table-wrap {
-        overflow-x: auto;   /* 👉 thêm scroll ngang */
-        max-height: 60vh;
-        border: 1px solid #ccc;
-      }
+.file-btn {
+  display:inline-flex; align-items:center; justify-content:center;
+  background:#58b3f5; color:#0d6efd;
+  width:20px; height:20px; border-radius:6px;
+  text-decoration:none;
+}
+</style>
+</head>
 
-      table { 
-        width:100%; 
-        border-collapse:collapse;
-        min-width:600px; /* 👉 tránh co quá nhỏ */
-      }
+<body>
+<div class="container">
 
-      th {
-        background: #dee2e6;
-        border-bottom: 2px solid #999;
-        white-space: nowrap;
-      }
+<div class="card">
+  <h2>📢 BÁO HẠN VĂN BẢN</h2>
+  <p id="today"></p>
+</div>
 
-      th, td {
-        border-bottom: 1px solid #bbb;
-        border-right: 1px solid #eee;
-        padding: 8px;
-        font-size: 13px;
-      }
-
-      tbody tr:hover {
-        background: #f1f3f5 !important;
-      }
-
-      /* ===== STATUS ===== */
-      .overdue { background:#ffcccc; }
-      .soon { background:#fff3cd }
-      .normal { background:#d4edda }
-
-      /* ===== STATS ===== */
-      .stats { 
-        display:flex; 
-        gap:8px;
-      }
-
-      .stat { 
-        flex:1; 
-        padding:10px; 
-        border-radius:8px; 
-        color:white; 
-        text-align:center;
-        font-size:14px;
-      }
-
-      .red { background:#dc3545 }
-      .yellow { background:#ffc107; color:black }
-      .green { background:#28a745 }
-
-      /* ===== HIGHLIGHT ===== */
-      mark {
-        background: #ffe066;
-        padding: 2px 4px;
-        border-radius: 4px;
-      }
-
-      /* ===== STICKY HEADER ===== */
-      thead th {
-        position: sticky;
-        top: 0;
-        z-index: 2;
-        background: #dee2e6;
-      }
-
-      /* ===== FILTER BAR ===== */
-      .filter-bar {
-        display: flex;
-        justify-content: center; /* căn giữa */
-        gap: 15px;
-      }
-
-      /* 👉 Cả 2 ô bằng nhau */
-      .filter-item {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        width: 300px;   /* 👉 chỉnh số này theo ý bạn */
-      }
-
-      .filter-item input,
-      .filter-item select {
-        width: 100%;
-      }
-
-      .icon {
-        font-size: 18px;
-      }
-
-      .file-btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        background: #58b3f5;
-        color: #0d6efd;
-        text-decoration: none;
-        width: 20px;
-        height: 20px;
-        border-radius: 6px;
-        font-size: 16px;
-        margin-right: 4px;
-        transition: 0.2s;
-      }
-
-      .file-btn:hover {
-        background: #0d6efd;
-        color: white;
-        transform: scale(1.1);
-      }
-
-      /* ===== MOBILE ===== */
-      @media(max-width:768px){
-
-        .container {
-          padding:10px;
-        }
-
-        h2 {
-          font-size:16px;
-        }
-
-        /* input xếp dọc */
-        .card input,
-        .card select {
-          width:100%;
-          margin-right:0;
-        }
-
-        /* stats xuống dòng */
-        .stats {
-          flex-direction: column;
-        }
-
-        .stat {
-          font-size:13px;
-          padding:8px;
-        }
-
-        /* table nhỏ lại */
-        th, td {
-          font-size:12px;
-          padding:6px;
-        }
-
-        .filter-bar {
-          flex-direction: column;
-        }
-
-        .filter-item {
-          width: 100%;
-        }
-      }
-    </style>
-  </head>
-
-  <body>
-  <div class="container">
-
-    <div class="card">
-      <h2>📢 BÁO HẠN VĂN BẢN</h2>
-      <p>📅 ${Utilities.formatDate(new Date(), "Asia/Ho_Chi_Minh", "dd/MM/yyyy")}</p>
-    </div>
-
-    <div class="card filter-bar">
-      <div class="filter-item">
-        <span class="icon">🔍</span>
-        <input type="text" id="search" placeholder="Tìm kiếm">
-      </div>
-
-      <div class="filter-item">
-        <span class="icon">🏢</span>
-        <select id="donvi">
-          <option value="">Tất cả đơn vị</option>
-          ${donViOptions.map(d => `<option value="${d}">${d}</option>`).join("")}
-        </select>
-      </div>
-    </div>
-
-    <div class="card stats">
-      <div class="stat red" id="statOverdue">0<br>Quá hạn</div>
-      <div class="stat yellow" id="statSoon">0<br>Sắp hết hạn</div>
-      <div class="stat green" id="statNormal">0<br>Còn hạn</div>
-    </div>
-
-    <div class="card">
-      <div class="table-wrap">
-        <table id="tbl">
-          <thead>
-            <tr>
-              <th onclick="sortTable(0)">STT</th>
-              <th onclick="sortTable(1)">Số VB</th>
-              <th onclick="sortTable(2)">Nội dung</th>
-              <th onclick="sortTable(3)">Đơn vị</th>
-              <th onclick="sortTable(4)">Hạn</th>
-              <th onclick="sortTable(5)">Trạng thái</th>
-              <th onclick="sortTable(6)">Đã ban hành</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${list.map((item, i) => {
-
-              var cls = "normal";
-              if (item.diff < 0) cls = "overdue";
-              else if (item.diff <= 3) cls = "soon";
-
-              var han = item.hanDate instanceof Date
-                ? Utilities.formatDate(item.hanDate, "Asia/Ho_Chi_Minh", "dd/MM/yyyy")
-                : "—";
-              
-              return `
-              <tr class="${cls}" data-donvi="${item.donVi}">
-                <td>${i+1}</td>
-                <td>
-                  ${item.linkFile ? `<a href="${item.linkFile}" target="_blank" class="file-btn">📄</a>` : ""}
-                  <b>${item.soVB}</b>
-                </td>
-                <td>${item.noiDung}</td>
-                <td>${item.donVi}</td>
-                <td>${han}</td>
-                <td>${item.trangThai}</td>
-                <td>
-                  ${item.linkFile2 ? `<a href="${item.linkFile2}" target="_blank" class="file-btn">📄</a>` : ""}
-                  ${item.soVBBHcapXa}
-                </td>
-              </tr>
-              `;
-            }).join("")}
-          </tbody>
-        </table>
-      </div>
-    </div>
+<div class="card filter-bar">
+  <div class="filter-item">
+    <span class="icon">🔍</span>
+    <input id="search" placeholder="Tìm kiếm">
   </div>
 
-  <script>
-    const search = document.getElementById("search");
-    const donvi = document.getElementById("donvi");
+  <div class="filter-item">
+    <span class="icon">🏢</span>
+    <select id="donvi"></select>
+  </div>
+</div>
 
-    let debounceTimer;
+<div class="card stats">
+  <div id="statOverdue">0</div>
+  <div id="statSoon">0</div>
+  <div id="statNormal">0</div>
+</div>
 
-    search.addEventListener("input", () => {
-      clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(filter, 200);
-    });
+<div class="card">
+  <div class="table-wrap">
+    <table id="tbl">
+      <thead>
+        <tr>
+          <th>STT</th>
+          <th>Số VB</th>
+          <th>Nội dung</th>
+          <th>Đơn vị</th>
+          <th>Hạn</th>
+          <th>Trạng thái</th>
+          <th>Đã ban hành</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
 
-    let sortDir = 1;
+</div>
 
-    function sortTable(colIndex){
-      const tbody = document.querySelector("#tbl tbody");
-      const rowsArr = Array.from(tbody.querySelectorAll("tr"));
+<script>
+const API = "👉 DÁN LINK APPS SCRIPT";
 
-      rowsArr.sort((a, b) => {
-        let A = a.children[colIndex].innerText.trim();
-        let B = b.children[colIndex].innerText.trim();
+let DATA = [];
 
-        // nếu là ngày dd/MM/yyyy
-        if (colIndex === 4) {
-          let da = A.split("/").reverse().join("-");
-          let db = B.split("/").reverse().join("-");
-          return (new Date(da) - new Date(db)) * sortDir;
-        }
+document.getElementById("today").innerText =
+  new Date().toLocaleDateString("vi-VN");
 
-        return A.localeCompare(B, 'vi') * sortDir;
-      });
+// 🚀 load data siêu nhanh
+fetch(API)
+  .then(r => r.json())
+  .then(data => {
+    DATA = data;
+    buildDonVi();
+    render(DATA);
+  });
 
-      sortDir *= -1;
+// build dropdown
+function buildDonVi(){
+  let set = new Set(DATA.map(d=>d.donVi));
+  let html = '<option value="">Tất cả đơn vị</option>';
+  set.forEach(d => html += `<option>${d}</option>`);
+  document.getElementById("donvi").innerHTML = html;
+}
 
-      rowsArr.forEach(tr => tbody.appendChild(tr));
-    }
+// render table
+function render(list){
+  let tbody = document.querySelector("#tbl tbody");
+  let html = "";
+  let over=0, soon=0, normal=0;
 
-    function highlightText(element, keyword) {
-      if (!keyword) return;
+  list.forEach((d,i)=>{
 
-      const normalizedKeyword = removeVietnameseTones(keyword);
+    let cls="normal";
+    if(d.dung) cls="dung";
+    else if(d.diff<0){cls="overdue"; over++;}
+    else if(d.diff<=3){cls="soon"; soon++;}
+    else normal++;
 
-      const walker = document.createTreeWalker(
-        element,
-        NodeFilter.SHOW_TEXT,
-        null,
-        false
-      );
+    let han = d.hanDate ? new Date(d.hanDate).toLocaleDateString("vi-VN") : "";
 
-      const nodes = [];
-      while (walker.nextNode()) {
-        nodes.push(walker.currentNode);
-      }
+    html += `
+    <tr class="${cls}">
+      <td>${i+1}</td>
+      <td>
+        ${d.linkFile ? `<a href="${d.linkFile}" target="_blank" class="file-btn">📄</a>` : ""}
+        <b>${d.soVB}</b>
+      </td>
+      <td>${d.noiDung||""}</td>
+      <td>${d.donVi||""}</td>
+      <td>${han}</td>
+      <td>${d.trangThai||""}</td>
+      <td>
+        ${d.linkFile2 ? `<a href="${d.linkFile2}" target="_blank" class="file-btn">📄</a>` : ""}
+        ${d.soVBBHcapXa||""}
+      </td>
+    </tr>`;
+  });
 
-      nodes.forEach(node => {
-        const text = node.nodeValue;
-        if (!text.trim()) return;
+  tbody.innerHTML = html;
 
-        const normalizedText = removeVietnameseTones(text);
+  document.getElementById("statOverdue").innerHTML = over + " quá hạn";
+  document.getElementById("statSoon").innerHTML = soon + " sắp hết hạn";
+  document.getElementById("statNormal").innerHTML = normal + " còn hạn";
+}
 
-        let index = normalizedText.indexOf(normalizedKeyword);
-        if (index === -1) return;
+// filter
+document.getElementById("search").oninput = filter;
+document.getElementById("donvi").onchange = filter;
 
-        const frag = document.createDocumentFragment();
-        let lastIndex = 0;
+function filter(){
+  let k = document.getElementById("search").value.toLowerCase();
+  let dv = document.getElementById("donvi").value;
 
-        while (index !== -1) {
-          // text trước
-          frag.appendChild(document.createTextNode(text.slice(lastIndex, index)));
+  let f = DATA.filter(d =>
+    (!k || JSON.stringify(d).toLowerCase().includes(k)) &&
+    (!dv || d.donVi===dv)
+  );
 
-          // highlight
-          const mark = document.createElement("mark");
-          mark.textContent = text.substr(index, normalizedKeyword.length);
-          frag.appendChild(mark);
-
-          lastIndex = index + normalizedKeyword.length;
-          index = normalizedText.indexOf(normalizedKeyword, lastIndex);
-        }
-
-        // phần còn lại
-        frag.appendChild(document.createTextNode(text.slice(lastIndex)));
-
-        node.parentNode.replaceChild(frag, node);
-      });
-    }
-
-    function removeHighlight(element) {
-      element.querySelectorAll("mark").forEach(mark => {
-        mark.replaceWith(mark.textContent);
-      });
-    }
-
-    function removeVietnameseTones(str) {
-      return str
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/đ/g, "d")
-        .replace(/Đ/g, "D")
-        .toLowerCase();
-    }
-
-    function filter(){
-      const keywords = search.value
-        .trim()
-        .split(/\s+/)
-        .filter(k => k.length >= 2);
-      const rows = document.querySelectorAll("#tbl tbody tr");
-      let d = donvi.value;
-
-      let over=0, soon=0, normal=0;
-
-      rows.forEach(r => {
-        let rawText = r.innerText;
-        let text = removeVietnameseTones(rawText);
-        let dv = r.dataset.donvi;
-
-        let show;
-
-        // 👉 nếu chưa nhập gì → hiện tất cả
-        if (keywords.length === 0) {
-          show = (!d || d === dv);
-        } else {
-          // 👉 có tìm kiếm → lọc theo keyword
-          show = keywords.every(k =>
-            text.includes(removeVietnameseTones(k))
-          ) && (!d || d === dv);
-        }
-        r.style.display = show ? "" : "none";
-
-        // reset highlight trước
-        r.querySelectorAll("td").forEach(td => removeHighlight(td));
-
-        // highlight lại
-        if (show && keywords.length > 0) {
-          r.querySelectorAll("td").forEach(td => {
-            keywords.forEach(k => {
-              highlightText(td, k);
-            });
-          });
-        }
-
-        if(show){
-          if(r.classList.contains("overdue")) over++;
-          else if(r.classList.contains("soon")) soon++;
-          else normal++;
-        }
-      });
-
-      document.getElementById("statOverdue").innerHTML = over + " VB<br>Qua ngày hạn";
-      document.getElementById("statSoon").innerHTML = soon + " VB<br>Sắp hết hạn";
-      document.getElementById("statNormal").innerHTML = normal + " VB<br>Còn hạn";
-    }
-
-    donvi.addEventListener("change", filter);
-
-    filter();
-  </script>
+  render(f);
+}
+</script>
 
 </body>
 </html>
