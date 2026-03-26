@@ -37,18 +37,6 @@
         frame.style.height = e.data.height + "px";
       }
     });
-    
-    try {
-      frame.addEventListener("load", function () {
-        try {
-          const h = frame.contentDocument.body.scrollHeight;
-          if (h > 100) frame.style.height = h + "px";
-        } catch (e) {}
-      });
-    } catch (e) {}
-
-    frame.style.height = "2000px";
   </script>
-
 </body>
 </html>
