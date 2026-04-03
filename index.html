@@ -2,105 +2,10 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <title>Báo hạn văn bản</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    html, body {
-      height: 100%;
-      overflow: hidden; /* Không scroll trang ngoài, chỉ scroll trong iframe */
-    }
-
-    body {
-      background: #f5f6fa;
-    }
-
-    /* Loading overlay */
-    #loading {
-      position: fixed;
-      inset: 0;
-      background: #f5f6fa;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 14px;
-      font-size: 16px;
-      color: #444;
-      z-index: 10;
-      font-family: Arial, sans-serif;
-    }
-    .spinner {
-      width: 44px; height: 44px;
-      border: 5px solid #dee2e6;
-      border-top-color: #0d6efd;
-      border-radius: 50%;
-      animation: spin .8s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* ===== KEY FIX: iframe chiếm đúng 100% viewport =====
-       - position fixed tránh bị đẩy lệch khi bàn phím ảo mở
-       - touch-action: auto cho phép touch đúng tọa độ
-       - transform: translateZ(0) kích hoạt GPU layer riêng             */
-    iframe {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%;
-      height: 100%;
-      border: none;
-      opacity: 0;
-      transition: opacity .3s;
-      touch-action: auto;
-      -webkit-overflow-scrolling: touch;
-      transform: translateZ(0);
-    }
-
-    iframe.loaded {
-      opacity: 1;
-    }
-  </style>
-</head>
-<body>
-
-  <div id="loading">
-    <div class="spinner"></div>
-    <div>Đang tải dữ liệu…</div>
-  </div>
-
-  <iframe
-    id="gasFrame"
-    src="https://script.google.com/macros/s/AKfycbyTg4PKExzBtRNThYWFhXXGy9f8W1uSdU0q_g7UFV9w6fGJ5Sr2-iaVb1XhTCKL9YnXRQ/exec"
-    allow="same-origin"
-    scrolling="yes"
-  ></iframe>
-
   <script>
-    var frame   = document.getElementById("gasFrame");
-    var loading = document.getElementById("loading");
-
-    // Ẩn loading khi iframe load xong
-    frame.addEventListener("load", function () {
-      loading.style.display = "none";
-      frame.classList.add("loaded");
-
-      // Trên iOS: iframe đôi khi cần nudge để nhận touch đúng
-      // → resize nhỏ rồi trả lại ngay, buộc layout recalc
-      frame.style.height = "99.9%";
-      requestAnimationFrame(function () {
-        frame.style.height = "100%";
-      });
-    });
-
-    // Timeout fallback: nếu 15s chưa load → vẫn hiện iframe
-    setTimeout(function () {
-      if (loading.style.display !== "none") {
-        loading.style.display = "none";
-        frame.classList.add("loaded");
-      }
-    }, 15000);
+    window.location.replace("https://script.google.com/macros/s/AKfycbyTg4PKExzBtRNThYWFhXXGy9f8W1uSdU0q_g7UFV9w6fGJ5Sr2-iaVb1XhTCKL9YnXRQ/exec");
   </script>
-
-</body>
+</head>
+<body></body>
 </html>
