@@ -2,41 +2,122 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <title>Báo hạn văn bản</title>
   <style>
-    *, *::before, *::after { box-sizing: border-box; }
-
-    html, body {
-      margin: 0;
-      padding: 0;
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
       font-family: Arial, sans-serif;
       background: #f5f6fa;
+      /* Đảm bảo scroll mượt trên iOS */
+      -webkit-overflow-scrolling: touch;
     }
 
-    iframe {
-      display: block;
+    /* ===== LOADING ===== */
+    #loading {
+      position: fixed;
+      inset: 0;
+      background: #f5f6fa;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      font-size: 16px;
+      color: #444;
+      z-index: 999;
+    }
+    .spinner {
+      width: 44px; height: 44px;
+      border: 5px solid #dee2e6;
+      border-top-color: #0d6efd;
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ===== NỘI DUNG GAS ===== */
+    #app {
+      display: none;
       width: 100%;
-      border: none;
-      overflow: hidden;
+      min-height: 100vh;
     }
   </style>
 </head>
 <body>
 
-  <iframe
-    id="appFrame"
-    src="https://script.google.com/macros/s/AKfycbyTg4PKExzBtRNThYWFhXXGy9f8W1uSdU0q_g7UFV9w6fGJ5Sr2-iaVb1XhTCKL9YnXRQ/exec"
-    scrolling="no"
-  ></iframe>
+  <div id="loading">
+    <div class="spinner"></div>
+    <div>Đang tải dữ liệu…</div>
+  </div>
+
+  <div id="app"></div>
 
   <script>
-    const frame = document.getElementById("appFrame");
-    window.addEventListener("message", function (e) {
-      if (e.data && e.data.type === "setHeight") {
-        frame.style.height = e.data.height + "px";
-      }
-    });
+    var GAS_URL = "https://script.google.com/macros/s/AKfycbyTg4PKExzBtRNThYWFhXXGy9f8W1uSdU0q_g7UFV9w6fGJ5Sr2-iaVb1XhTCKL9YnXRQ/exec";
+
+    fetch(GAS_URL)
+      .then(function(res) { return res.text(); })
+      .then(function(html) {
+        // Tách <body> content và <style>/<script> ra inject đúng cách
+        var app = document.getElementById("app");
+
+        // Dùng DOMParser để parse HTML trả về
+        var parser = new DOMParser();
+        var doc = parser.parseFromString(html, "text/html");
+
+        // Inject <style> vào <head> trang hiện tại
+        doc.querySelectorAll("style").forEach(function(s) {
+          var style = document.createElement("style");
+          style.textContent = s.textContent;
+          document.head.appendChild(style);
+        });
+
+        // Inject nội dung <body> vào #app (bỏ qua loading spinner của GAS vì ta dùng loading của trang này)
+        var gasBody = doc.body;
+
+        // Ẩn loading overlay của GAS nếu có (id="loading")
+        var gasLoading = gasBody.querySelector("#loading");
+        if (gasLoading) gasLoading.remove();
+
+        // Hiện main ngay (GAS có thể ẩn bằng display:none chờ DOMContentLoaded)
+        var gasMain = gasBody.querySelector("#main");
+        if (gasMain) gasMain.style.display = "";
+
+        app.innerHTML = gasBody.innerHTML;
+
+        // Inject <script> — innerHTML không chạy script, phải tạo lại
+        doc.querySelectorAll("script").forEach(function(s) {
+          var script = document.createElement("script");
+          if (s.src) {
+            script.src = s.src;
+          } else {
+            script.textContent = s.textContent;
+          }
+          document.body.appendChild(script);
+        });
+
+        // Ẩn loading, hiện app
+        document.getElementById("loading").style.display = "none";
+        app.style.display = "block";
+
+        // Chạy filter() nếu đã được định nghĩa (phòng trường hợp chưa kịp chạy)
+        setTimeout(function() {
+          if (typeof filter === "function") filter();
+        }, 100);
+      })
+      .catch(function(err) {
+        document.getElementById("loading").innerHTML =
+          '<div style="color:#dc3545;text-align:center;padding:20px">'
+          + '⚠️ Không tải được dữ liệu.<br><br>'
+          + '<button onclick="location.reload()" '
+          + 'style="padding:10px 20px;border:none;background:#0d6efd;color:#fff;border-radius:8px;font-size:15px;cursor:pointer">'
+          + '🔄 Thử lại</button>'
+          + '</div>';
+        console.error(err);
+      });
   </script>
+
 </body>
 </html>
