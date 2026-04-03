@@ -2,19 +2,21 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <title>Báo hạn văn bản</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { height: 100%; }
-    body {
-      font-family: Arial, sans-serif;
-      background: #f5f6fa;
-      /* Đảm bảo scroll mượt trên iOS */
-      -webkit-overflow-scrolling: touch;
+
+    html, body {
+      height: 100%;
+      overflow: hidden; /* Không scroll trang ngoài, chỉ scroll trong iframe */
     }
 
-    /* ===== LOADING ===== */
+    body {
+      background: #f5f6fa;
+    }
+
+    /* Loading overlay */
     #loading {
       position: fixed;
       inset: 0;
@@ -26,7 +28,8 @@
       gap: 14px;
       font-size: 16px;
       color: #444;
-      z-index: 999;
+      z-index: 10;
+      font-family: Arial, sans-serif;
     }
     .spinner {
       width: 44px; height: 44px;
@@ -37,11 +40,25 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ===== NỘI DUNG GAS ===== */
-    #app {
-      display: none;
+    /* ===== KEY FIX: iframe chiếm đúng 100% viewport =====
+       - position fixed tránh bị đẩy lệch khi bàn phím ảo mở
+       - touch-action: auto cho phép touch đúng tọa độ
+       - transform: translateZ(0) kích hoạt GPU layer riêng             */
+    iframe {
+      position: fixed;
+      top: 0; left: 0;
       width: 100%;
-      min-height: 100vh;
+      height: 100%;
+      border: none;
+      opacity: 0;
+      transition: opacity .3s;
+      touch-action: auto;
+      -webkit-overflow-scrolling: touch;
+      transform: translateZ(0);
+    }
+
+    iframe.loaded {
+      opacity: 1;
     }
   </style>
 </head>
@@ -52,71 +69,37 @@
     <div>Đang tải dữ liệu…</div>
   </div>
 
-  <div id="app"></div>
+  <iframe
+    id="gasFrame"
+    src="https://script.google.com/macros/s/AKfycbyTg4PKExzBtRNThYWFhXXGy9f8W1uSdU0q_g7UFV9w6fGJ5Sr2-iaVb1XhTCKL9YnXRQ/exec"
+    allow="same-origin"
+    scrolling="yes"
+  ></iframe>
 
   <script>
-    var GAS_URL = "https://script.google.com/macros/s/AKfycbyTg4PKExzBtRNThYWFhXXGy9f8W1uSdU0q_g7UFV9w6fGJ5Sr2-iaVb1XhTCKL9YnXRQ/exec";
+    var frame   = document.getElementById("gasFrame");
+    var loading = document.getElementById("loading");
 
-    fetch(GAS_URL)
-      .then(function(res) { return res.text(); })
-      .then(function(html) {
-        // Tách <body> content và <style>/<script> ra inject đúng cách
-        var app = document.getElementById("app");
+    // Ẩn loading khi iframe load xong
+    frame.addEventListener("load", function () {
+      loading.style.display = "none";
+      frame.classList.add("loaded");
 
-        // Dùng DOMParser để parse HTML trả về
-        var parser = new DOMParser();
-        var doc = parser.parseFromString(html, "text/html");
-
-        // Inject <style> vào <head> trang hiện tại
-        doc.querySelectorAll("style").forEach(function(s) {
-          var style = document.createElement("style");
-          style.textContent = s.textContent;
-          document.head.appendChild(style);
-        });
-
-        // Inject nội dung <body> vào #app (bỏ qua loading spinner của GAS vì ta dùng loading của trang này)
-        var gasBody = doc.body;
-
-        // Ẩn loading overlay của GAS nếu có (id="loading")
-        var gasLoading = gasBody.querySelector("#loading");
-        if (gasLoading) gasLoading.remove();
-
-        // Hiện main ngay (GAS có thể ẩn bằng display:none chờ DOMContentLoaded)
-        var gasMain = gasBody.querySelector("#main");
-        if (gasMain) gasMain.style.display = "";
-
-        app.innerHTML = gasBody.innerHTML;
-
-        // Inject <script> — innerHTML không chạy script, phải tạo lại
-        doc.querySelectorAll("script").forEach(function(s) {
-          var script = document.createElement("script");
-          if (s.src) {
-            script.src = s.src;
-          } else {
-            script.textContent = s.textContent;
-          }
-          document.body.appendChild(script);
-        });
-
-        // Ẩn loading, hiện app
-        document.getElementById("loading").style.display = "none";
-        app.style.display = "block";
-
-        // Chạy filter() nếu đã được định nghĩa (phòng trường hợp chưa kịp chạy)
-        setTimeout(function() {
-          if (typeof filter === "function") filter();
-        }, 100);
-      })
-      .catch(function(err) {
-        document.getElementById("loading").innerHTML =
-          '<div style="color:#dc3545;text-align:center;padding:20px">'
-          + '⚠️ Không tải được dữ liệu.<br><br>'
-          + '<button onclick="location.reload()" '
-          + 'style="padding:10px 20px;border:none;background:#0d6efd;color:#fff;border-radius:8px;font-size:15px;cursor:pointer">'
-          + '🔄 Thử lại</button>'
-          + '</div>';
-        console.error(err);
+      // Trên iOS: iframe đôi khi cần nudge để nhận touch đúng
+      // → resize nhỏ rồi trả lại ngay, buộc layout recalc
+      frame.style.height = "99.9%";
+      requestAnimationFrame(function () {
+        frame.style.height = "100%";
       });
+    });
+
+    // Timeout fallback: nếu 15s chưa load → vẫn hiện iframe
+    setTimeout(function () {
+      if (loading.style.display !== "none") {
+        loading.style.display = "none";
+        frame.classList.add("loaded");
+      }
+    }, 15000);
   </script>
 
 </body>
